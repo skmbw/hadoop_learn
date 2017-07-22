@@ -54,6 +54,11 @@ decode_raw tf.train.batch All shapes must be fully defined
 如果使用了第二种方式，但是输入端的数据没有经过encode_png，那么是不会出错，但是解析不到数据，那么也会报队列中没有数据的异常
 
 
+java.io.IOException: Incompatible clusterIDs in
+网上一些文章和帖子说是tmp目录，它本身也是没问题的，但Hadoop 2.4.0是data目录，实际上这个信息已经由日志的“/data/hadoop/hadoop-2.4.0/data”指出，所以不能死死的参照网上的解决办法，遇到问题时多仔细观察。
+从上述描述不难看出，解决办法就是清空所有DataNode的data目录，但注意不要将data目录本身给删除了。
+data目录由core-site.xml文件中的属性“dfs.datanode.data.dir”指定。
+
 
 windows虚拟机环境下，tensorflow安装成功，但是运行报导入dll核心库失败，原因可能是没有安装微软的vc2015 res runtime 库
 
