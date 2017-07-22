@@ -1,0 +1,62 @@
+tensorflow.python.framework.errors_impl.InvalidArgumentError: Received a label value of 7906 which is outside the valid range of [0, 7906).  Label values: 254 7147 3102 4859 797 844 3495 3535 3802 7019 1589 4664 3433 6841 6244 1761 6455 5449 5347 1215 585 3273 1534 5544 7443 1202 4189 5039 3728 7804 6668 7128 2445 7235 10 2440 2142 3904 5475 221 1611 4214 3503 708 3372 2822 5748 7176 7451 6484 1038 1467 2581 760 5677 7815 3864 328 2090 1618 6444 2367 902 6992 1919 4181 4990 263 5857 6339 4944 4553 1566 5617 3401 6373 2269 567 6599 3110 1 7511 7768 2422 4434 2318 2074 1138 6533 5699 7662 6730 5747 469 3546 2297 2322 5911 7906 6115
+         [[Node: cross_entroy_loss/cross_entroy_loss = SparseSoftmaxCrossEntropyWithLogits[T=DT_FLOAT, Tlabels=DT_INT64, _device="/job:localhost/replica:0/task:0/cpu:0"](cross_entroy_loss/Reshape, cross_entroy_loss/Reshape_1)]]
+
+
+
+Having two different functions is a convenience, as they produce the same result.
+
+The difference is simple:
+
+1、For sparse_softmax_cross_entropy_with_logits, labels must have the shape [batch_size] and the dtype int32 or int64. Each label is an int in range [0, num_classes-1].
+2、For softmax_cross_entropy_with_logits, labels must have the shape [batch_size, num_classes] and dtype float32 or float64.
+Labels used in softmax_cross_entropy_with_logits are the one hot version of labels used in sparse_softmax_cross_entropy_with_logits.
+
+Another tiny difference is that with sparse_softmax_cross_entropy_with_logits, you can give -1 as a label to have loss 0 on this label.
+
+
+    tf.train.SummaryWriter()
+AttributeError: module 'tensorflow.python.training.training' has no attribute 'SummaryWriter'
+
+移到新的package下了  tf.summary.FileWriter
+
+
+
+
+I'm reading batch of images by getting idea here from tfrecords(converted by this)
+
+My images are cifar images, [32, 32, 3] and as you can see while reading and passing images the shapes are normal (batch_size=100)
+
+the 2 most notable problems stated in the log, as far as I know is
+
+Shape of 12228, which I don't know from where I get this. All my tensors are either in shape [32, 32, 3] or [None, 3072]
+Running out of sample
+Compute status: Out of range: RandomSuffleQueue '_2_input/shuffle_batch/random_shuffle_queue' is closed and has insufficient elements (requested 100, current size 0)
+
+答：I had a similar problem. Digging around the web, it turned out that if you use some num_epochs argument, you have to initialize all the local variables, so your code should end up looking like:
+
+with tf.Session() as sess:
+    sess.run(tf.local_variables_initializer())
+    sess.run(tf.global_variables_initializer())
+    coord = tf.train.Coordinator()
+    threads = tf.train.start_queue_runners(coord=coord)
+
+    # do your stuff here
+
+    coord.request_stop()
+    coord.join(threads)
+If you post some more code
+关键是初始化本地变量，也有可能是features = tf.parse_single_example中的变量名字错误，找不到
+
+
+
+decode_raw tf.train.batch All shapes must be fully defined
+# shape 不匹配，第一种是使用tf.reshape，第二种是decode_png，然后再resize_image，但是输入端也要是encode_png。不可以使用tf.set_shape
+如果使用了第二种方式，但是输入端的数据没有经过encode_png，那么是不会出错，但是解析不到数据，那么也会报队列中没有数据的异常
+
+
+
+windows虚拟机环境下，tensorflow安装成功，但是运行报导入dll核心库失败，原因可能是没有安装微软的vc2015 res runtime 库
+
+hadoop fs -mkdir /yinlei 在hadoop文件系统根目录创建yinlei文件夹
+hadoop put将本地文件上传到hdfs，本地目录是相对于当前命令行所在的目录。
+hadoop fs -put README.txt /yinlei # 将README.txt文件存入hdfs
