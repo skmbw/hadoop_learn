@@ -24,6 +24,8 @@ public class ListStatus {
         for (int i = 0; i < paths.length; i++) {
             paths[i] = new Path(args[i]);
         }
+        // 可以使用通配符来过滤文件，PathFilter可以通过编程来手工过滤
+//        FileStatus[] statuses = fs.globStatus(Path, PathFilter)
         FileStatus[] status = fs.listStatus(paths);
         Path[] listedPaths = FileUtil.stat2Paths(status);
         for (Path p : listedPaths) {
