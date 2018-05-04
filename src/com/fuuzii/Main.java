@@ -18,11 +18,11 @@ public class Main {
         Configuration configuration = new Configuration();
 
         if (args.length != 2) {
-            System.err.println("Usage:wordcount <input><output>");
+            System.err.println("Usage:wordcount <input> <output>");
             System.exit(2);
         }
 
-        Job job = new Job(configuration, "wordcount");
+        Job job = Job.getInstance(configuration, "wordcount");
 
         job.setJarByClass(Main.class);
         job.setMapperClass(WordCountMapper.class);
